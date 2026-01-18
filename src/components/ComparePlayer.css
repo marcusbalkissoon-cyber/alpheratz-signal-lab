@@ -1,0 +1,195 @@
+/* ====================================
+   ComparePlayer Styles
+   Split-screen video comparison
+   ==================================== */
+
+.compare-player {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: #000;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Video Layers */
+.compare-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.compare-video-bottom {
+    z-index: 1;
+}
+
+.compare-video-top {
+    z-index: 2;
+    transition: clip-path 0.05s ease-out;
+}
+
+/* Divider */
+.compare-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    transform: translateX(-50%);
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.compare-divider-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg,
+            transparent 0%,
+            var(--accent-gold) 10%,
+            var(--accent-gold) 90%,
+            transparent 100%);
+    box-shadow: 0 0 10px var(--accent-gold-dim);
+}
+
+.compare-divider-handle {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    background: var(--bg-obsidian);
+    border: 2px solid var(--accent-gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-gold);
+    box-shadow: 0 0 20px var(--accent-gold-dim);
+}
+
+/* Labels */
+.compare-labels {
+    position: absolute;
+    top: var(--space-sm);
+    left: 0;
+    right: 0;
+    z-index: 5;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 var(--space-sm);
+    pointer-events: none;
+}
+
+.compare-label {
+    font-family: var(--font-header);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: var(--space-xs) var(--space-sm);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+}
+
+.compare-label-right {
+    color: var(--accent-gold);
+}
+
+/* Slider (Invisible, covers entire area) */
+.compare-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    opacity: 0;
+    cursor: ew-resize;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+}
+
+.compare-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 60px;
+    height: 100%;
+    background: transparent;
+    cursor: ew-resize;
+}
+
+.compare-slider::-moz-range-thumb {
+    width: 60px;
+    height: 100%;
+    background: transparent;
+    border: none;
+    cursor: ew-resize;
+}
+
+/* Play Indicator */
+.compare-play-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 15;
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-gold);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.compare-play-indicator.hidden {
+    opacity: 0;
+}
+
+/* Hover Effects */
+.compare-player:hover .compare-divider-handle {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .compare-divider-handle {
+        width: 32px;
+        height: 32px;
+    }
+
+    .compare-divider-handle svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .compare-label {
+        font-size: 0.625rem;
+        padding: 4px 8px;
+    }
+
+    .compare-play-indicator {
+        width: 60px;
+        height: 60px;
+    }
+
+    .compare-play-indicator svg {
+        width: 32px;
+        height: 32px;
+    }
+}

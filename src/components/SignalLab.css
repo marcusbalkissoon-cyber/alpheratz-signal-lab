@@ -1,0 +1,437 @@
+/* ====================================
+   SignalLab Styles
+   Main feed layout and page structure
+   ==================================== */
+
+.signal-lab {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.signal-lab-header {
+    text-align: center;
+    padding: var(--space-xl) var(--space-md);
+    position: relative;
+}
+
+.header-emblem {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-md);
+    color: var(--accent-gold);
+    animation: pulse 3s ease-in-out infinite;
+}
+
+.header-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-bottom: var(--space-sm);
+}
+
+.title-prefix {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: -4px;
+}
+
+.title-main {
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    color: var(--accent-gold);
+    line-height: 1;
+}
+
+.header-subtitle {
+    font-family: var(--font-header);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+.header-status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 6px 16px;
+    background: rgba(46, 204, 113, 0.1);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+    border-radius: 20px;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    background: #2ecc71;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+
+.status-text {
+    font-family: var(--font-header);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #2ecc71;
+}
+
+/* Feed */
+.signal-lab-feed {
+    flex: 1;
+    padding-top: var(--space-lg);
+    padding-bottom: var(--space-xl);
+}
+
+/* ====================================
+   Intake CTA Section
+   ==================================== */
+
+.intake-section {
+    padding: var(--space-xl) 0;
+}
+
+.intake-container {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--space-lg);
+}
+
+.intake-terminal {
+    width: 100%;
+    max-width: 600px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow:
+        0 0 40px rgba(255, 215, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.terminal-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.terminal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.terminal-dot:first-child {
+    background: #ff5f56;
+}
+
+.terminal-dot:nth-child(2) {
+    background: #ffbd2e;
+}
+
+.terminal-dot:nth-child(3) {
+    background: #27ca40;
+}
+
+.terminal-title {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+.terminal-body {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.terminal-prompt {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin: 0;
+}
+
+.prompt-symbol {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 1.25rem;
+    color: var(--accent-gold);
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.prompt-text {
+    font-family: var(--font-header);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
+}
+
+.intake-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    background: linear-gradient(135deg, var(--accent-gold) 0%, #B8860B 100%);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.intake-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent);
+    transition: left 0.5s ease;
+}
+
+.intake-button:hover::before {
+    left: 100%;
+}
+
+.intake-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+}
+
+.intake-button:active {
+    transform: translateY(0);
+}
+
+.button-text {
+    font-family: var(--font-header);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--bg-obsidian);
+}
+
+.button-separator {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.875rem;
+    color: rgba(5, 5, 5, 0.5);
+}
+
+.button-action {
+    font-family: var(--font-header);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--bg-obsidian);
+    opacity: 0.8;
+}
+
+.button-arrow {
+    color: var(--bg-obsidian);
+    opacity: 0.7;
+    transition: transform 0.3s ease;
+}
+
+.intake-button:hover .button-arrow {
+    transform: translateX(4px);
+}
+
+/* Footer */
+.signal-lab-footer {
+    margin-top: auto;
+    padding-bottom: var(--space-lg);
+}
+
+.footer-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--space-lg);
+}
+
+.footer-logo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.logo-text {
+    font-family: var(--font-header);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--text-primary);
+}
+
+.logo-suffix {
+    font-family: var(--font-header);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    color: var(--text-secondary);
+}
+
+.footer-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.meta-text {
+    font-family: var(--font-header);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.meta-separator {
+    color: var(--glass-border);
+}
+
+/* Background Effects */
+.signal-lab::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(255, 215, 0, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 0% 100%, rgba(255, 215, 0, 0.02) 0%, transparent 40%),
+        radial-gradient(ellipse at 100% 100%, rgba(255, 215, 0, 0.02) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Scan Lines Effect (subtle) */
+.signal-lab::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 0, 0, 0.03) 2px,
+            rgba(0, 0, 0, 0.03) 4px);
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .signal-lab-header {
+        padding: var(--space-lg) var(--space-sm);
+    }
+
+    .header-emblem svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    .header-subtitle {
+        font-size: 0.625rem;
+        letter-spacing: 0.15em;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: var(--space-md);
+        text-align: center;
+    }
+
+    .footer-logo {
+        align-items: center;
+    }
+
+    .signal-lab-feed {
+        padding-top: var(--space-md);
+        padding-bottom: var(--space-lg);
+    }
+
+    /* Intake CTA Mobile */
+    .intake-section {
+        padding: var(--space-lg) 0;
+    }
+
+    .terminal-body {
+        padding: var(--space-md);
+        gap: var(--space-md);
+    }
+
+    .prompt-text {
+        font-size: 0.75rem;
+    }
+
+    .intake-button {
+        flex-wrap: wrap;
+        padding: var(--space-sm) var(--space-md);
+        gap: 6px;
+    }
+
+    .button-text {
+        font-size: 0.8125rem;
+    }
+
+    .button-action {
+        font-size: 0.6875rem;
+    }
+
+    .button-separator {
+        display: none;
+    }
+}
+
+/* Large Screen Adjustments */
+@media (min-width: 1200px) {
+    .signal-lab-feed {
+        max-width: 900px;
+    }
+
+    .intake-terminal {
+        max-width: 700px;
+    }
+}

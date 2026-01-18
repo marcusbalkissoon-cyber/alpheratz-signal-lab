@@ -1,0 +1,541 @@
+/* ====================================
+   MissionLog Styles
+   Expandable card with 2-column layout
+   ==================================== */
+
+.mission-log {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--space-md);
+    transition: border-color 0.3s ease;
+}
+
+.mission-log:hover {
+    border-color: rgba(255, 215, 0, 0.2);
+}
+
+.mission-log.expanded {
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+/* Header */
+.mission-log-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s ease;
+}
+
+.mission-log-header:hover {
+    background: var(--glass-hover);
+}
+
+.mission-log-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mission-log-number {
+    font-family: var(--font-header);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+}
+
+.mission-log-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.mission-log-chevron {
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.mission-log.expanded .mission-log-chevron {
+    color: var(--accent-gold);
+}
+
+/* Content */
+.mission-log-content {
+    overflow: hidden;
+}
+
+.mission-log-custom {
+    padding: 0 var(--space-lg) var(--space-md);
+}
+
+/* 2-Column Grid Layout */
+.mission-log-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: var(--space-lg);
+    padding: 0 var(--space-lg) var(--space-lg);
+    align-items: start;
+}
+
+/* Visual Column (Left - contains Video + Album Art) */
+.mission-log-visual-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+/* Video Panel */
+.mission-log-visual {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: #000;
+}
+
+.mission-log-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Album Art */
+.album-art-link {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+}
+
+.album-art-link:hover {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+.album-art-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.album-art-link:hover .album-art-image {
+    opacity: 1;
+}
+
+.album-art-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    color: var(--accent-gold);
+}
+
+.album-art-link:hover .album-art-overlay {
+    opacity: 1;
+}
+
+.album-art-overlay span {
+    font-family: var(--font-header);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* Info Panel (Right Column) */
+.mission-log-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-xs) 0;
+}
+
+.info-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+/* Service Badge */
+.info-service {
+    font-family: var(--font-header);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    padding: 4px 10px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    width: fit-content;
+}
+
+/* Project Title */
+.info-project {
+    font-family: var(--font-header);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--text-primary);
+    margin: var(--space-xs) 0 0 0;
+    line-height: 1.3;
+}
+
+/* Material */
+.info-material {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: baseline;
+    margin-top: var(--space-xs);
+}
+
+.material-label {
+    font-family: var(--font-header);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.material-value {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Architect's Log */
+.info-log {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: var(--space-sm);
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 2px solid var(--accent-gold-dim);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.log-label {
+    font-family: var(--font-header);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.log-content {
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-style: italic;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+/* Result */
+.info-result {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--glass-border);
+}
+
+.result-label {
+    font-family: var(--font-header);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.result-value {
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    color: var(--accent-gold);
+    font-weight: 700;
+}
+
+/* ====================================
+   Rich Content for Custom Logs
+   (Below ComparePlayer, etc.)
+   ==================================== */
+
+.mission-log-rich-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg) var(--space-lg);
+    border-top: 1px solid var(--glass-border);
+    margin-top: var(--space-sm);
+}
+
+.rich-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rich-field .field-label {
+    font-family: var(--font-header);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.rich-field .field-value {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.rich-field .field-project {
+    font-family: var(--font-header);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.rich-field-log {
+    padding: var(--space-sm);
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 2px solid var(--accent-gold-dim);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.rich-field .field-log {
+    font-style: italic;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.rich-field-result {
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--glass-border);
+}
+
+.rich-field .field-result {
+    font-size: 1rem;
+    color: var(--accent-gold);
+    font-weight: 700;
+}
+
+/* Controls in Info Panel */
+.info-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-top: auto;
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--glass-border);
+}
+
+/* Audio Progress Bar */
+.audio-progress {
+    position: relative;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    cursor: pointer;
+    overflow: visible;
+    transition: height 0.2s ease;
+}
+
+.audio-progress:hover {
+    height: 8px;
+}
+
+.audio-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-gold) 0%, #B8860B 100%);
+    border-radius: 3px;
+    transition: width 0.05s linear;
+    position: relative;
+}
+
+.audio-progress-handle {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    background: var(--accent-gold);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.audio-progress:hover .audio-progress-handle {
+    opacity: 1;
+}
+
+/* Audio Time */
+.audio-time {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+    font-weight: 500;
+}
+
+/* Button Row */
+.info-buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-xs);
+}
+
+/* Play Button */
+.btn-play {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+}
+
+.btn-play svg {
+    flex-shrink: 0;
+}
+
+/* Ghost Icon Button */
+.btn-ghost.btn-icon {
+    opacity: 0.6;
+    border-color: rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
+.btn-ghost.btn-icon:hover {
+    opacity: 1;
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+}
+
+/* ====================================
+   Mobile: Stack Layout
+   ==================================== */
+
+@media (max-width: 768px) {
+    .mission-log-header {
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .mission-log-custom {
+        padding: 0 var(--space-md) var(--space-sm);
+    }
+
+    .mission-log-grid {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+        padding: 0 var(--space-md) var(--space-md);
+    }
+
+    .mission-log-info {
+        gap: var(--space-sm);
+        padding: 0;
+    }
+
+    .info-project {
+        font-size: 1rem;
+    }
+
+    .info-log {
+        padding: var(--space-xs);
+    }
+
+    .log-content {
+        font-size: 0.75rem;
+    }
+
+    .audio-time {
+        font-size: 0.625rem;
+    }
+
+    .mission-log-title {
+        font-size: 0.875rem;
+    }
+
+    .mission-log-number {
+        font-size: 0.625rem;
+    }
+
+    .info-buttons {
+        flex-direction: row;
+    }
+
+    .btn-play {
+        flex: 1;
+    }
+
+    .mission-log-rich-content {
+        padding: var(--space-sm) var(--space-md) var(--space-md);
+        gap: var(--space-sm);
+    }
+
+    .rich-field .field-project {
+        font-size: 1rem;
+    }
+
+    .rich-field .field-log {
+        font-size: 0.75rem;
+    }
+}
+
+/* ====================================
+   Large Screens
+   ==================================== */
+
+@media (min-width: 1024px) {
+    .mission-log-grid {
+        grid-template-columns: 1.3fr 1fr;
+        gap: var(--space-xl);
+    }
+
+    .info-project {
+        font-size: 1.25rem;
+    }
+
+    .log-content {
+        font-size: 0.875rem;
+    }
+}
