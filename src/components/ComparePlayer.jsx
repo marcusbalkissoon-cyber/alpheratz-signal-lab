@@ -16,6 +16,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
     const [isPlaying, setIsPlaying] = useState(false)
     const [isMuted, setIsMuted] = useState(true)
     const [isDragging, setIsDragging] = useState(false)
+    const [debugLog, setDebugLog] = useState('Status: Init')
     const videoARef = useRef(null)
     const videoBRef = useRef(null)
     const containerRef = useRef(null)
@@ -94,6 +95,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
     // Expose audio control methods to parent via ref
     useImperativeHandle(ref, () => ({
         toggleMuted: () => {
+            setDebugLog('Attempting Play...')
             const videoA = videoARef.current
             const videoB = videoBRef.current
             const newMuted = !isMuted
@@ -101,11 +103,19 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             // iOS Aggressive Kickstart: muted = false FIRST, then play()
             if (videoA) {
                 videoA.muted = newMuted
-                videoA.play().catch(e => console.log("Force play A error:", e))
+                videoA.play()
+                    .then(() => setDebugLog(prev => prev + ' | A:OK'))
+                    .catch(e => setDebugLog(prev => prev + ' | A:' + e.name))
+            } else {
+                setDebugLog('Ref A Missing!')
             }
             if (videoB) {
                 videoB.muted = newMuted
-                videoB.play().catch(e => console.log("Force play B error:", e))
+                videoB.play()
+                    .then(() => setDebugLog(prev => prev + ' | B:OK'))
+                    .catch(e => setDebugLog(prev => prev + ' | B:' + e.name))
+            } else {
+                setDebugLog(prev => prev + ' | Ref B Missing!')
             }
 
             setIsMuted(newMuted)
@@ -240,6 +250,23 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
         >
+            {/* Debug Overlay */}
+            <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 50,
+                background: 'red',
+                color: 'white',
+                padding: '4px 8px',
+                fontSize: '10px',
+                fontFamily: 'monospace',
+                maxWidth: '100%',
+                wordBreak: 'break-all'
+            }}>
+                {debugLog}
+            </div>
+
             {/* Bottom Video (A - Simulation) - Always visible, starts muted */}
             <video
                 ref={videoARef}
@@ -252,6 +279,11 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
                 playsInline
                 webkit-playsinline="true"
                 preload="auto"
+                onError={(e) => setDebugLog('VidA Err: ' + (e.target.error ? e.target.error.message : 'Unknown'))}
+                onSuspend={() => setDebugLog(prev => prev + ' | A:Suspend')}
+                onStalled={() => setDebugLog(prev => prev + ' | A:Stalled')}
+                onCanPlay={() => setDebugLog('A:CanPlay')}
+                onPlaying={() => setDebugLog(prev => prev + ' | A:Playing')}
             />
 
             {/* Top Video (B - Reality) - Clipped based on slider, starts muted */}
@@ -267,6 +299,11 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
                 playsInline
                 webkit-playsinline="true"
                 preload="auto"
+                onError={(e) => setDebugLog('VidB Err: ' + (e.target.error ? e.target.error.message : 'Unknown'))}
+                onSuspend={() => setDebugLog(prev => prev + ' | B:Suspend')}
+                onStalled={() => setDebugLog(prev => prev + ' | B:Stalled')}
+                onCanPlay={() => setDebugLog(prev => prev + ' | B:CanPlay')}
+                onPlaying={() => setDebugLog(prev => prev + ' | B:Playing')}
             />
 
             {/* Divider Line */}
