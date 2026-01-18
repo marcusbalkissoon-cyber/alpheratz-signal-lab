@@ -1,10 +1,11 @@
-import { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react'
+import { useRef, useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react'
 import './ComparePlayer.css'
 
 /**
  * ComparePlayer - Split-screen video comparison with slider control
  * 
  * Features:
+ * - Touch + Mouse slider support for mobile and desktop
  * - Slider controls visual clip-path reveal AND audio cross-fade
  * - Videos stay synced (play/pause together)
  * - Exposes audio control via ref for parent component
@@ -14,21 +15,112 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
     const [sliderValue, setSliderValue] = useState(50)
     const [isPlaying, setIsPlaying] = useState(false)
     const [isMuted, setIsMuted] = useState(true)
+    const [isDragging, setIsDragging] = useState(false)
     const videoARef = useRef(null)
     const videoBRef = useRef(null)
     const containerRef = useRef(null)
 
+    // Calculate position from mouse or touch event
+    const calculatePosition = useCallback((clientX) => {
+        const container = containerRef.current
+        if (!container) return 50
+
+        const rect = container.getBoundingClientRect()
+        const x = clientX - rect.left
+        const percentage = (x / rect.width) * 100
+
+        // Clamp between 0 and 100
+        return Math.max(0, Math.min(100, percentage))
+    }, [])
+
+    // Touch event handlers
+    const handleTouchStart = useCallback((e) => {
+        e.preventDefault()
+        setIsDragging(true)
+        const touch = e.touches[0]
+        const position = calculatePosition(touch.clientX)
+        setSliderValue(position)
+    }, [calculatePosition])
+
+    const handleTouchMove = useCallback((e) => {
+        if (!isDragging) return
+        e.preventDefault()
+        const touch = e.touches[0]
+        const position = calculatePosition(touch.clientX)
+        setSliderValue(position)
+    }, [isDragging, calculatePosition])
+
+    const handleTouchEnd = useCallback(() => {
+        setIsDragging(false)
+    }, [])
+
+    // Mouse event handlers (for desktop)
+    const handleMouseDown = useCallback((e) => {
+        // Only start drag if clicking on divider area
+        if (e.target.closest('.compare-divider') || e.target.classList.contains('compare-slider')) {
+            setIsDragging(true)
+            const position = calculatePosition(e.clientX)
+            setSliderValue(position)
+        }
+    }, [calculatePosition])
+
+    const handleMouseMove = useCallback((e) => {
+        if (!isDragging) return
+        const position = calculatePosition(e.clientX)
+        setSliderValue(position)
+    }, [isDragging, calculatePosition])
+
+    const handleMouseUp = useCallback(() => {
+        setIsDragging(false)
+    }, [])
+
+    // Global mouse/touch event listeners for drag
+    useEffect(() => {
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove)
+            window.addEventListener('mouseup', handleMouseUp)
+            window.addEventListener('touchmove', handleTouchMove, { passive: false })
+            window.addEventListener('touchend', handleTouchEnd)
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove)
+            window.removeEventListener('mouseup', handleMouseUp)
+            window.removeEventListener('touchmove', handleTouchMove)
+            window.removeEventListener('touchend', handleTouchEnd)
+        }
+    }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd])
+
     // Expose audio control methods to parent via ref
     useImperativeHandle(ref, () => ({
         toggleMuted: () => {
+            const videoA = videoARef.current
+            const videoB = videoBRef.current
             const newMuted = !isMuted
+
+            // iOS requires explicit play() on user interaction
+            if (!newMuted && videoA && videoB) {
+                videoA.play().catch(() => { })
+                videoB.play().catch(() => { })
+            }
+
             setIsMuted(newMuted)
             return !newMuted // Return true if audio is now ON
         },
         setMuted: (muted) => {
             setIsMuted(muted)
         },
-        isMuted: () => isMuted
+        isMuted: () => isMuted,
+        // Expose explicit play for iOS unlock
+        playVideos: () => {
+            const videoA = videoARef.current
+            const videoB = videoBRef.current
+            if (videoA && videoB) {
+                videoA.play().catch(() => { })
+                videoB.play().catch(() => { })
+                setIsPlaying(true)
+            }
+        }
     }))
 
     // Sync videos on play/pause
@@ -83,7 +175,8 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
         if (videoA && videoB && !isMuted) {
             // Slider left (0) = Simulation loud, Reality quiet
             // Slider right (100) = Reality loud, Simulation quiet
-            const realityVolume = sliderValue / 100
+            const safeValue = isNaN(sliderValue) ? 50 : sliderValue
+            const realityVolume = safeValue / 100
             const simulationVolume = 1 - realityVolume
 
             videoA.volume = simulationVolume
@@ -121,14 +214,17 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
         setSliderValue(Number(e.target.value))
     }
 
-    const togglePlayback = () => {
+    const togglePlayback = (e) => {
+        // Don't toggle if dragging or clicking on slider
+        if (isDragging || e.target.classList.contains('compare-slider')) return
         setIsPlaying(!isPlaying)
     }
 
+    // Safe slider value (never NaN or undefined)
+    const safeSliderValue = isNaN(sliderValue) || sliderValue === undefined ? 50 : sliderValue
+
     // Calculate clip-path for top video (srcB / Reality)
-    // Slider at 0 = fully hidden (inset from right 100%)
-    // Slider at 100 = fully visible (inset from right 0%)
-    const clipPercentage = 100 - sliderValue
+    const clipPercentage = 100 - safeSliderValue
     const clipPath = `inset(0 ${clipPercentage}% 0 0)`
 
     return (
@@ -136,6 +232,8 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             ref={containerRef}
             className="compare-player"
             onClick={togglePlayback}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
         >
             {/* Bottom Video (A - Simulation) - Always visible */}
             <video
@@ -165,7 +263,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             {/* Divider Line */}
             <div
                 className="compare-divider"
-                style={{ left: `${sliderValue}%` }}
+                style={{ left: `${safeSliderValue}%` }}
             >
                 <div className="compare-divider-line" />
                 <div className="compare-divider-handle">
@@ -182,12 +280,12 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
                 <span className="compare-label compare-label-right">REALITY</span>
             </div>
 
-            {/* Slider Control */}
+            {/* Slider Control (invisible, for accessibility) */}
             <input
                 type="range"
                 min="0"
                 max="100"
-                value={sliderValue}
+                value={safeSliderValue}
                 onChange={handleSliderChange}
                 onClick={(e) => e.stopPropagation()}
                 className="compare-slider"

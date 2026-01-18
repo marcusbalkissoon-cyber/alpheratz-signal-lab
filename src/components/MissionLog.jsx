@@ -1,4 +1,4 @@
-import { useState, useRef, cloneElement, isValidElement, Children } from 'react'
+import { useState, useRef, useEffect, cloneElement, isValidElement, Children } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Play, Pause, Volume2, VolumeX, ExternalLink, ChevronDown } from 'lucide-react'
 import './MissionLog.css'
@@ -42,19 +42,26 @@ const MissionLog = ({
     // Check if we're in compare mode (has children like ComparePlayer)
     const isCompareMode = !!children
 
-    // Initialize click sound on first interaction
-    const getClickSound = () => {
-        if (!clickSoundRef.current) {
-            clickSoundRef.current = new Audio('/ui/ui_click.mp3')
-            clickSoundRef.current.volume = 0.3
+    // Initialize click sound once on mount
+    useEffect(() => {
+        clickSoundRef.current = new Audio('/ui/ui_click.mp3')
+        clickSoundRef.current.volume = 0.3
+        // Preload the sound
+        clickSoundRef.current.load()
+
+        return () => {
+            if (clickSoundRef.current) {
+                clickSoundRef.current.pause()
+                clickSoundRef.current = null
+            }
         }
-        return clickSoundRef.current
-    }
+    }, [])
 
     const playClickSound = () => {
-        const sound = getClickSound()
-        sound.currentTime = 0
-        sound.play().catch(() => { })
+        if (clickSoundRef.current) {
+            clickSoundRef.current.currentTime = 0
+            clickSoundRef.current.play().catch(() => { })
+        }
     }
 
     const toggleExpanded = () => {
@@ -77,14 +84,21 @@ const MissionLog = ({
         setIsPlaying(!isPlaying)
     }
 
-    // Toggle video audio for compare mode
+    // Toggle video audio for compare mode (with iOS unlock)
     const toggleVideoAudio = (e) => {
         e.stopPropagation()
         playClickSound()
 
-        if (comparePlayerRef.current && comparePlayerRef.current.toggleMuted) {
-            const audioIsNowOn = comparePlayerRef.current.toggleMuted()
-            setIsVideoAudioOn(audioIsNowOn)
+        if (comparePlayerRef.current) {
+            // Call playVideos first for iOS user interaction requirement
+            if (comparePlayerRef.current.playVideos) {
+                comparePlayerRef.current.playVideos()
+            }
+
+            if (comparePlayerRef.current.toggleMuted) {
+                const audioIsNowOn = comparePlayerRef.current.toggleMuted()
+                setIsVideoAudioOn(audioIsNowOn)
+            }
         }
     }
 
