@@ -16,7 +16,6 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
     const [isPlaying, setIsPlaying] = useState(false)
     const [isMuted, setIsMuted] = useState(true)
     const [isDragging, setIsDragging] = useState(false)
-    const [debugLog, setDebugLog] = useState('Status: Init')
     const videoARef = useRef(null)
     const videoBRef = useRef(null)
     const containerRef = useRef(null)
@@ -57,7 +56,6 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
 
     // Mouse event handlers (for desktop)
     const handleMouseDown = useCallback((e) => {
-        // Only start drag if clicking on divider area
         if (e.target.closest('.compare-divider') || e.target.classList.contains('compare-slider')) {
             setIsDragging(true)
             const position = calculatePosition(e.clientX)
@@ -95,7 +93,6 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
     // Expose audio control methods to parent via ref
     useImperativeHandle(ref, () => ({
         toggleMuted: () => {
-            setDebugLog('Attempting Play...')
             const videoA = videoARef.current
             const videoB = videoBRef.current
             const newMuted = !isMuted
@@ -103,30 +100,21 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             // iOS Aggressive Kickstart: muted = false FIRST, then play()
             if (videoA) {
                 videoA.muted = newMuted
-                videoA.play()
-                    .then(() => setDebugLog(prev => prev + ' | A:OK'))
-                    .catch(e => setDebugLog(prev => prev + ' | A:' + e.name))
-            } else {
-                setDebugLog('Ref A Missing!')
+                videoA.play().catch(() => { })
             }
             if (videoB) {
                 videoB.muted = newMuted
-                videoB.play()
-                    .then(() => setDebugLog(prev => prev + ' | B:OK'))
-                    .catch(e => setDebugLog(prev => prev + ' | B:' + e.name))
-            } else {
-                setDebugLog(prev => prev + ' | Ref B Missing!')
+                videoB.play().catch(() => { })
             }
 
             setIsMuted(newMuted)
             setIsPlaying(true)
-            return !newMuted // Return true if audio is now ON
+            return !newMuted
         },
         setMuted: (muted) => {
             setIsMuted(muted)
         },
         isMuted: () => isMuted,
-        // Expose explicit play for iOS unlock
         playVideos: () => {
             const videoA = videoARef.current
             const videoB = videoBRef.current
@@ -138,21 +126,18 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
         }
     }))
 
-    // Sync videos on play/pause
-    useEffect(() => {
+    // Video Sync Lock: Keep videos in sync via timeupdate on master (A)
+    const handleTimeUpdate = useCallback(() => {
         const videoA = videoARef.current
         const videoB = videoBRef.current
 
-        if (!videoA || !videoB) return
-
-        const syncVideos = () => {
-            if (Math.abs(videoA.currentTime - videoB.currentTime) > 0.1) {
+        if (videoA && videoB) {
+            const drift = Math.abs(videoA.currentTime - videoB.currentTime)
+            // Only sync if drift is noticeable (>0.1s) to avoid audio popping
+            if (drift > 0.1) {
                 videoB.currentTime = videoA.currentTime
             }
         }
-
-        videoA.addEventListener('timeupdate', syncVideos)
-        return () => videoA.removeEventListener('timeupdate', syncVideos)
     }, [])
 
     // Handle play/pause sync
@@ -171,25 +156,12 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
         }
     }, [isPlaying])
 
-    // Sync muted state to both videos
-    useEffect(() => {
-        const videoA = videoARef.current
-        const videoB = videoBRef.current
-
-        if (videoA && videoB) {
-            videoA.muted = isMuted
-            videoB.muted = isMuted
-        }
-    }, [isMuted])
-
     // Audio cross-fade based on slider position
     useEffect(() => {
         const videoA = videoARef.current
         const videoB = videoBRef.current
 
         if (videoA && videoB && !isMuted) {
-            // Slider left (0) = Simulation loud, Reality quiet
-            // Slider right (100) = Reality loud, Simulation quiet
             const safeValue = isNaN(sliderValue) ? 50 : sliderValue
             const realityVolume = safeValue / 100
             const simulationVolume = 1 - realityVolume
@@ -205,21 +177,16 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
         const videoB = videoBRef.current
 
         if (videoA && videoB) {
-            // Set initial volumes (centered = 50/50)
             videoA.volume = 0.5
             videoB.volume = 0.5
 
-            // Ensure videos start playing
             const playVideos = () => {
                 videoA.play().catch(() => { })
                 videoB.play().catch(() => { })
                 setIsPlaying(true)
             }
 
-            // Try to play immediately
             playVideos()
-
-            // Also try after a short delay for browser quirks
             setTimeout(playVideos, 100)
         }
     }, [])
@@ -230,7 +197,6 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
     }
 
     const togglePlayback = (e) => {
-        // Don't toggle if dragging or clicking on slider
         if (isDragging || e.target.classList.contains('compare-slider')) return
         setIsPlaying(!isPlaying)
     }
@@ -246,28 +212,12 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
         <div
             ref={containerRef}
             className="compare-player"
+            style={{ touchAction: 'none' }}
             onClick={togglePlayback}
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
         >
-            {/* Debug Overlay */}
-            <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                zIndex: 50,
-                background: 'red',
-                color: 'white',
-                padding: '4px 8px',
-                fontSize: '10px',
-                fontFamily: 'monospace',
-                maxWidth: '100%',
-                wordBreak: 'break-all'
-            }}>
-                {debugLog}
-            </div>
-
-            {/* Bottom Video (A - Simulation) - Always visible, starts muted */}
+            {/* Bottom Video (A - Simulation) - Master for sync */}
             <video
                 ref={videoARef}
                 className="compare-video compare-video-bottom"
@@ -279,14 +229,10 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
                 playsInline
                 webkit-playsinline="true"
                 preload="auto"
-                onError={(e) => setDebugLog('VidA Err: ' + (e.target.error ? e.target.error.message : 'Unknown'))}
-                onSuspend={() => setDebugLog(prev => prev + ' | A:Suspend')}
-                onStalled={() => setDebugLog(prev => prev + ' | A:Stalled')}
-                onCanPlay={() => setDebugLog('A:CanPlay')}
-                onPlaying={() => setDebugLog(prev => prev + ' | A:Playing')}
+                onTimeUpdate={handleTimeUpdate}
             />
 
-            {/* Top Video (B - Reality) - Clipped based on slider, starts muted */}
+            {/* Top Video (B - Reality) - Synced to master */}
             <video
                 ref={videoBRef}
                 className="compare-video compare-video-top"
@@ -299,11 +245,6 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
                 playsInline
                 webkit-playsinline="true"
                 preload="auto"
-                onError={(e) => setDebugLog('VidB Err: ' + (e.target.error ? e.target.error.message : 'Unknown'))}
-                onSuspend={() => setDebugLog(prev => prev + ' | B:Suspend')}
-                onStalled={() => setDebugLog(prev => prev + ' | B:Stalled')}
-                onCanPlay={() => setDebugLog(prev => prev + ' | B:CanPlay')}
-                onPlaying={() => setDebugLog(prev => prev + ' | B:Playing')}
             />
 
             {/* Divider Line */}
