@@ -76,6 +76,20 @@
     padding: 0 var(--space-lg) var(--space-md);
 }
 
+/* Compare Mode Controls */
+.mission-log-compare-controls {
+    display: flex;
+    justify-content: center;
+    padding: 0 var(--space-lg) var(--space-md);
+}
+
+.btn-audio-toggle {
+    min-width: 200px;
+    padding: var(--space-sm) var(--space-lg);
+    font-size: 0.875rem;
+    gap: var(--space-sm);
+}
+
 /* 2-Column Grid Layout */
 .mission-log-grid {
     display: grid;
@@ -466,13 +480,40 @@
     .mission-log-grid {
         display: flex;
         flex-direction: column;
+        align-items: center;
         gap: var(--space-md);
         padding: 0 var(--space-md) var(--space-md);
     }
 
+    .mission-log-visual-column {
+        width: 100%;
+        align-items: center;
+    }
+
     .mission-log-info {
+        width: 100%;
         gap: var(--space-sm);
         padding: 0;
+        align-items: center;
+        text-align: center;
+    }
+
+    .info-header {
+        align-items: center;
+        text-align: center;
+    }
+
+    .info-log {
+        text-align: left;
+    }
+
+    .info-result {
+        justify-content: center;
+    }
+
+    .info-controls {
+        width: 100%;
+        align-items: center;
     }
 
     .info-project {

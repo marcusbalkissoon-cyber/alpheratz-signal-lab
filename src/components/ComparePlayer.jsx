@@ -1,20 +1,35 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react'
 import './ComparePlayer.css'
 
 /**
  * ComparePlayer - Split-screen video comparison with slider control
  * 
- * Physics:
- * - Slider 0 (Left): Top Video Hidden (Volume 0%)
- * - Slider 100 (Right): Top Video Fully Visible (Volume 100%)
- * - Both videos stay synced (play/pause together)
+ * Features:
+ * - Slider controls visual clip-path reveal
+ * - Videos stay synced (play/pause together)
+ * - Exposes audio control via ref for parent component
+ * - Muted by default for iOS autoplay compatibility
  */
-const ComparePlayer = ({ srcA, srcB, aspectRatio = '16/9' }) => {
+const ComparePlayer = forwardRef(({ srcA, srcB, aspectRatio = '16/9' }, ref) => {
     const [sliderValue, setSliderValue] = useState(50)
     const [isPlaying, setIsPlaying] = useState(false)
+    const [isMuted, setIsMuted] = useState(true)
     const videoARef = useRef(null)
     const videoBRef = useRef(null)
     const containerRef = useRef(null)
+
+    // Expose audio control methods to parent via ref
+    useImperativeHandle(ref, () => ({
+        toggleMuted: () => {
+            const newMuted = !isMuted
+            setIsMuted(newMuted)
+            return !newMuted // Return true if audio is now ON
+        },
+        setMuted: (muted) => {
+            setIsMuted(muted)
+        },
+        isMuted: () => isMuted
+    }))
 
     // Sync videos on play/pause
     useEffect(() => {
@@ -49,22 +64,24 @@ const ComparePlayer = ({ srcA, srcB, aspectRatio = '16/9' }) => {
         }
     }, [isPlaying])
 
-    // Update volume based on slider position
-    useEffect(() => {
-        const videoB = videoBRef.current
-        if (videoB) {
-            videoB.volume = sliderValue / 100
-        }
-    }, [sliderValue])
-
-    // Auto-play on mount (muted to comply with browser policies)
+    // Sync muted state to videos
     useEffect(() => {
         const videoA = videoARef.current
         const videoB = videoBRef.current
 
         if (videoA && videoB) {
-            videoA.muted = true
-            videoB.muted = false
+            // Only the top video (B) plays audio - it's the "Reality" layer
+            videoA.muted = true // Background always muted
+            videoB.muted = isMuted
+        }
+    }, [isMuted])
+
+    // Auto-play on mount (muted for iOS autoplay compatibility)
+    useEffect(() => {
+        const videoA = videoARef.current
+        const videoB = videoBRef.current
+
+        if (videoA && videoB) {
             videoA.play().catch(() => { })
             videoB.play().catch(() => { })
             setIsPlaying(true)
@@ -92,7 +109,7 @@ const ComparePlayer = ({ srcA, srcB, aspectRatio = '16/9' }) => {
             style={{ aspectRatio }}
             onClick={togglePlayback}
         >
-            {/* Bottom Video (A) - Always visible */}
+            {/* Bottom Video (A) - Always visible, always muted */}
             <video
                 ref={videoARef}
                 className="compare-video compare-video-bottom"
@@ -102,7 +119,7 @@ const ComparePlayer = ({ srcA, srcB, aspectRatio = '16/9' }) => {
                 playsInline
             />
 
-            {/* Top Video (B) - Clipped based on slider */}
+            {/* Top Video (B) - Clipped based on slider, audio source */}
             <video
                 ref={videoBRef}
                 className="compare-video compare-video-top"
@@ -149,8 +166,19 @@ const ComparePlayer = ({ srcA, srcB, aspectRatio = '16/9' }) => {
                     <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
             </div>
+
+            {/* Muted Indicator */}
+            {!isMuted && (
+                <div className="audio-indicator">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                    </svg>
+                </div>
+            )}
         </div>
     )
-}
+})
+
+ComparePlayer.displayName = 'ComparePlayer'
 
 export default ComparePlayer

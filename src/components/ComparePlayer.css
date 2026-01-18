@@ -193,3 +193,22 @@
         height: 32px;
     }
 }
+
+/* Audio Indicator */
+.audio-indicator {
+    position: absolute;
+    bottom: var(--space-sm);
+    right: var(--space-sm);
+    z-index: 15;
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-gold);
+    pointer-events: none;
+    animation: pulse 2s ease-in-out infinite;
+}

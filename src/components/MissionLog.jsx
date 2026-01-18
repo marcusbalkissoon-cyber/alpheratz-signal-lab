@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, cloneElement, isValidElement, Children } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Pause, ExternalLink, ChevronDown } from 'lucide-react'
+import { Play, Pause, Volume2, VolumeX, ExternalLink, ChevronDown } from 'lucide-react'
 import './MissionLog.css'
 
 /**
@@ -12,6 +12,7 @@ import './MissionLog.css'
  * - Video-focused design with rich info panel
  * - Scientific hierarchy: Service, Project, Material, Log, Result
  * - Functional audio playback with progress bar
+ * - Compare mode: controls video audio via ref
  * - Album art with Spotify link
  * - External Spotify link button
  */
@@ -31,10 +32,15 @@ const MissionLog = ({
 }) => {
     const [isExpanded, setIsExpanded] = useState(false)
     const [isPlaying, setIsPlaying] = useState(false)
+    const [isVideoAudioOn, setIsVideoAudioOn] = useState(false)
     const [audioDuration, setAudioDuration] = useState(0)
     const [audioProgress, setAudioProgress] = useState(0)
     const audioRef = useRef(null)
+    const comparePlayerRef = useRef(null)
     const clickSoundRef = useRef(null)
+
+    // Check if we're in compare mode (has children like ComparePlayer)
+    const isCompareMode = !!children
 
     // Initialize click sound on first interaction
     const getClickSound = () => {
@@ -69,6 +75,17 @@ const MissionLog = ({
             audio.play().catch(() => { })
         }
         setIsPlaying(!isPlaying)
+    }
+
+    // Toggle video audio for compare mode
+    const toggleVideoAudio = (e) => {
+        e.stopPropagation()
+        playClickSound()
+
+        if (comparePlayerRef.current && comparePlayerRef.current.toggleMuted) {
+            const audioIsNowOn = comparePlayerRef.current.toggleMuted()
+            setIsVideoAudioOn(audioIsNowOn)
+        }
     }
 
     const handleSpotifyClick = (e) => {
@@ -117,6 +134,14 @@ const MissionLog = ({
     // Check if we have rich content (service, project, etc.)
     const hasRichContent = service || project || material || architectLog || result
 
+    // Clone children to pass ref to ComparePlayer
+    const childrenWithRef = Children.map(children, (child) => {
+        if (isValidElement(child)) {
+            return cloneElement(child, { ref: comparePlayerRef })
+        }
+        return child
+    })
+
     return (
         <motion.div
             className={`mission-log ${isExpanded ? 'expanded' : ''}`}
@@ -152,11 +177,24 @@ const MissionLog = ({
                         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                     >
                         {/* Custom Content (like ComparePlayer) */}
-                        {children ? (
+                        {isCompareMode ? (
                             <>
                                 <div className="mission-log-custom">
-                                    {children}
+                                    {childrenWithRef}
                                 </div>
+
+                                {/* Controls for Compare Mode */}
+                                <div className="mission-log-compare-controls">
+                                    <button
+                                        className={`btn ${isVideoAudioOn ? 'btn-primary' : 'btn-ghost'} btn-audio-toggle`}
+                                        onClick={toggleVideoAudio}
+                                        aria-label={isVideoAudioOn ? 'Mute video' : 'Unmute video'}
+                                    >
+                                        {isVideoAudioOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                                        <span>{isVideoAudioOn ? 'SOUND ON' : 'PLAY TRANSMISSION'}</span>
+                                    </button>
+                                </div>
+
                                 {/* Rich Content Below ComparePlayer */}
                                 {hasRichContent && (
                                     <div className="mission-log-rich-content">
