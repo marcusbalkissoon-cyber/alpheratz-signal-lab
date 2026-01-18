@@ -19,6 +19,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
     const videoARef = useRef(null)
     const videoBRef = useRef(null)
     const containerRef = useRef(null)
+    const rafRef = useRef(null) // For requestAnimationFrame throttling
 
     // Calculate position from mouse or touch event
     const calculatePosition = useCallback((clientX) => {
@@ -33,22 +34,31 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
         return Math.max(0, Math.min(100, percentage))
     }, [])
 
+    // Throttled position update using requestAnimationFrame
+    const updateSliderPosition = useCallback((clientX) => {
+        if (rafRef.current) return // Skip if a frame is already pending
+
+        rafRef.current = requestAnimationFrame(() => {
+            const position = calculatePosition(clientX)
+            setSliderValue(position)
+            rafRef.current = null
+        })
+    }, [calculatePosition])
+
     // Touch event handlers
     const handleTouchStart = useCallback((e) => {
         e.preventDefault()
         setIsDragging(true)
         const touch = e.touches[0]
-        const position = calculatePosition(touch.clientX)
-        setSliderValue(position)
-    }, [calculatePosition])
+        updateSliderPosition(touch.clientX)
+    }, [updateSliderPosition])
 
     const handleTouchMove = useCallback((e) => {
         if (!isDragging) return
         e.preventDefault()
         const touch = e.touches[0]
-        const position = calculatePosition(touch.clientX)
-        setSliderValue(position)
-    }, [isDragging, calculatePosition])
+        updateSliderPosition(touch.clientX)
+    }, [isDragging, updateSliderPosition])
 
     const handleTouchEnd = useCallback(() => {
         setIsDragging(false)
@@ -58,16 +68,14 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
     const handleMouseDown = useCallback((e) => {
         if (e.target.closest('.compare-divider') || e.target.classList.contains('compare-slider')) {
             setIsDragging(true)
-            const position = calculatePosition(e.clientX)
-            setSliderValue(position)
+            updateSliderPosition(e.clientX)
         }
-    }, [calculatePosition])
+    }, [updateSliderPosition])
 
     const handleMouseMove = useCallback((e) => {
         if (!isDragging) return
-        const position = calculatePosition(e.clientX)
-        setSliderValue(position)
-    }, [isDragging, calculatePosition])
+        updateSliderPosition(e.clientX)
+    }, [isDragging, updateSliderPosition])
 
     const handleMouseUp = useCallback(() => {
         setIsDragging(false)
@@ -89,6 +97,15 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             window.removeEventListener('touchend', handleTouchEnd)
         }
     }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd])
+
+    // Cleanup RAF on unmount
+    useEffect(() => {
+        return () => {
+            if (rafRef.current) {
+                cancelAnimationFrame(rafRef.current)
+            }
+        }
+    }, [])
 
     // Expose audio control methods to parent via ref
     useImperativeHandle(ref, () => ({
@@ -133,8 +150,8 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
 
         if (videoA && videoB) {
             const drift = Math.abs(videoA.currentTime - videoB.currentTime)
-            // Only sync if drift is noticeable (>0.1s) to avoid audio popping
-            if (drift > 0.1) {
+            // Only sync if drift is noticeable (>0.3s) to avoid fighting during buffering
+            if (drift > 0.3) {
                 videoB.currentTime = videoA.currentTime
             }
         }
