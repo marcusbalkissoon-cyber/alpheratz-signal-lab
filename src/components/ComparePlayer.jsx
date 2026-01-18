@@ -8,9 +8,10 @@ import './ComparePlayer.css'
  * - Slider controls visual clip-path reveal
  * - Videos stay synced (play/pause together)
  * - Exposes audio control via ref for parent component
- * - Muted by default for iOS autoplay compatibility
+ * - Bottom video (Simulation) always muted
+ * - Top video (Reality) is the audio source, controlled by ref
  */
-const ComparePlayer = forwardRef(({ srcA, srcB, aspectRatio = '16/9' }, ref) => {
+const ComparePlayer = forwardRef(({ srcA, srcB }, ref) => {
     const [sliderValue, setSliderValue] = useState(50)
     const [isPlaying, setIsPlaying] = useState(false)
     const [isMuted, setIsMuted] = useState(true)
@@ -64,31 +65,37 @@ const ComparePlayer = forwardRef(({ srcA, srcB, aspectRatio = '16/9' }, ref) => 
         }
     }, [isPlaying])
 
-    // Sync muted state to videos
+    // Sync muted state to top video (Reality)
     useEffect(() => {
-        const videoA = videoARef.current
         const videoB = videoBRef.current
-
-        if (videoA && videoB) {
-            // Only the top video (B) plays audio - it's the "Reality" layer
-            videoA.muted = true // Background always muted
+        if (videoB) {
             videoB.muted = isMuted
         }
     }, [isMuted])
 
-    // Auto-play on mount (muted for iOS autoplay compatibility)
+    // Auto-play on mount
     useEffect(() => {
         const videoA = videoARef.current
         const videoB = videoBRef.current
 
         if (videoA && videoB) {
-            videoA.play().catch(() => { })
-            videoB.play().catch(() => { })
-            setIsPlaying(true)
+            // Ensure videos start playing
+            const playVideos = () => {
+                videoA.play().catch(() => { })
+                videoB.play().catch(() => { })
+                setIsPlaying(true)
+            }
+
+            // Try to play immediately
+            playVideos()
+
+            // Also try after a short delay for browser quirks
+            setTimeout(playVideos, 100)
         }
     }, [])
 
     const handleSliderChange = (e) => {
+        e.stopPropagation()
         setSliderValue(Number(e.target.value))
     }
 
@@ -96,7 +103,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, aspectRatio = '16/9' }, ref) => 
         setIsPlaying(!isPlaying)
     }
 
-    // Calculate clip-path for top video (srcB)
+    // Calculate clip-path for top video (srcB / Reality)
     // Slider at 0 = fully hidden (inset from right 100%)
     // Slider at 100 = fully visible (inset from right 0%)
     const clipPercentage = 100 - sliderValue
@@ -106,26 +113,28 @@ const ComparePlayer = forwardRef(({ srcA, srcB, aspectRatio = '16/9' }, ref) => 
         <div
             ref={containerRef}
             className="compare-player"
-            style={{ aspectRatio }}
             onClick={togglePlayback}
         >
-            {/* Bottom Video (A) - Always visible, always muted */}
+            {/* Bottom Video (A - Simulation) - Always visible, always muted */}
             <video
                 ref={videoARef}
                 className="compare-video compare-video-bottom"
                 src={srcA}
+                autoPlay
                 loop
                 muted
                 playsInline
             />
 
-            {/* Top Video (B) - Clipped based on slider, audio source */}
+            {/* Top Video (B - Reality) - Clipped based on slider, audio source */}
             <video
                 ref={videoBRef}
                 className="compare-video compare-video-top"
                 src={srcB}
                 style={{ clipPath }}
+                autoPlay
                 loop
+                muted={isMuted}
                 playsInline
             />
 
@@ -156,6 +165,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, aspectRatio = '16/9' }, ref) => 
                 max="100"
                 value={sliderValue}
                 onChange={handleSliderChange}
+                onClick={(e) => e.stopPropagation()}
                 className="compare-slider"
                 aria-label="Compare videos"
             />
@@ -167,7 +177,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, aspectRatio = '16/9' }, ref) => 
                 </svg>
             </div>
 
-            {/* Muted Indicator */}
+            {/* Audio Indicator */}
             {!isMuted && (
                 <div className="audio-indicator">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
