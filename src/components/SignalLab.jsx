@@ -89,6 +89,8 @@ const SignalLab = () => {
                     <ComparePlayer
                         srcA="/visuals/log2_sim.mp4"
                         srcB="/visuals/log2_real.mp4"
+                        posterA="/images/spec_organic.jpeg"
+                        posterB="/images/spec_synthetic.jpeg"
                     />
                 </MissionLog>
 

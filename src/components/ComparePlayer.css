@@ -9,7 +9,7 @@
     aspect-ratio: 16 / 9;
     overflow: hidden;
     border-radius: var(--radius-lg);
-    background: #000;
+    background: transparent;
     cursor: pointer;
     user-select: none;
 }

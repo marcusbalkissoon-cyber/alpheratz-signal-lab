@@ -5,13 +5,12 @@ import './ComparePlayer.css'
  * ComparePlayer - Split-screen video comparison with slider control
  * 
  * Features:
- * - Slider controls visual clip-path reveal
+ * - Slider controls visual clip-path reveal AND audio cross-fade
  * - Videos stay synced (play/pause together)
  * - Exposes audio control via ref for parent component
- * - Bottom video (Simulation) always muted
- * - Top video (Reality) is the audio source, controlled by ref
+ * - Poster images prevent black screen on mobile
  */
-const ComparePlayer = forwardRef(({ srcA, srcB }, ref) => {
+const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.jpeg', posterB = '/images/spec_synthetic.jpeg' }, ref) => {
     const [sliderValue, setSliderValue] = useState(50)
     const [isPlaying, setIsPlaying] = useState(false)
     const [isMuted, setIsMuted] = useState(true)
@@ -65,13 +64,32 @@ const ComparePlayer = forwardRef(({ srcA, srcB }, ref) => {
         }
     }, [isPlaying])
 
-    // Sync muted state to top video (Reality)
+    // Sync muted state to both videos
     useEffect(() => {
+        const videoA = videoARef.current
         const videoB = videoBRef.current
-        if (videoB) {
+
+        if (videoA && videoB) {
+            videoA.muted = isMuted
             videoB.muted = isMuted
         }
     }, [isMuted])
+
+    // Audio cross-fade based on slider position
+    useEffect(() => {
+        const videoA = videoARef.current
+        const videoB = videoBRef.current
+
+        if (videoA && videoB && !isMuted) {
+            // Slider left (0) = Simulation loud, Reality quiet
+            // Slider right (100) = Reality loud, Simulation quiet
+            const realityVolume = sliderValue / 100
+            const simulationVolume = 1 - realityVolume
+
+            videoA.volume = simulationVolume
+            videoB.volume = realityVolume
+        }
+    }, [sliderValue, isMuted])
 
     // Auto-play on mount
     useEffect(() => {
@@ -79,6 +97,10 @@ const ComparePlayer = forwardRef(({ srcA, srcB }, ref) => {
         const videoB = videoBRef.current
 
         if (videoA && videoB) {
+            // Set initial volumes (centered = 50/50)
+            videoA.volume = 0.5
+            videoB.volume = 0.5
+
             // Ensure videos start playing
             const playVideos = () => {
                 videoA.play().catch(() => { })
@@ -115,22 +137,24 @@ const ComparePlayer = forwardRef(({ srcA, srcB }, ref) => {
             className="compare-player"
             onClick={togglePlayback}
         >
-            {/* Bottom Video (A - Simulation) - Always visible, always muted */}
+            {/* Bottom Video (A - Simulation) - Always visible */}
             <video
                 ref={videoARef}
                 className="compare-video compare-video-bottom"
                 src={srcA}
+                poster={posterA}
                 autoPlay
                 loop
-                muted
+                muted={isMuted}
                 playsInline
             />
 
-            {/* Top Video (B - Reality) - Clipped based on slider, audio source */}
+            {/* Top Video (B - Reality) - Clipped based on slider */}
             <video
                 ref={videoBRef}
                 className="compare-video compare-video-top"
                 src={srcB}
+                poster={posterB}
                 style={{ clipPath }}
                 autoPlay
                 loop
