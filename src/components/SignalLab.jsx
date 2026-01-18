@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
 import MissionLog from './MissionLog'
 import ComparePlayer from './ComparePlayer'
@@ -14,14 +14,29 @@ import './SignalLab.css'
  * - LOG 03: SYNTHETIC - Sonic Architecture
  */
 const SignalLab = () => {
-    // Persistent UI click sound (won't be garbage collected)
-    const uiAudio = useRef(typeof Audio !== 'undefined' ? new Audio('/ui/ui_click.mp3') : null)
+    // Persistent UI click sound ref
+    const clickSound = useRef(null)
+
+    // Initialize click sound ONCE on mount
+    useEffect(() => {
+        clickSound.current = new Audio('/ui/ui_click.mp3')
+        clickSound.current.preload = 'auto'
+        clickSound.current.volume = 0.3
+        // Force load
+        clickSound.current.load()
+
+        return () => {
+            if (clickSound.current) {
+                clickSound.current.pause()
+                clickSound.current = null
+            }
+        }
+    }, [])
 
     const playClickSound = () => {
-        if (uiAudio.current) {
-            uiAudio.current.currentTime = 0
-            uiAudio.current.volume = 0.3
-            uiAudio.current.play().catch(() => { })
+        if (clickSound.current) {
+            clickSound.current.currentTime = 0
+            clickSound.current.play().catch(() => { })
         }
     }
 

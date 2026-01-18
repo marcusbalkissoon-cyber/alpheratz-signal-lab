@@ -98,18 +98,18 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             const videoB = videoBRef.current
             const newMuted = !isMuted
 
-            // iOS Kickstart: Explicit play() + muted = false on user interaction
-            if (videoA && videoB) {
-                // Always try to play first
-                videoA.play().catch(() => { })
-                videoB.play().catch(() => { })
-
-                // Then set muted state directly on elements
+            // iOS Aggressive Kickstart: muted = false FIRST, then play()
+            if (videoA) {
                 videoA.muted = newMuted
+                videoA.play().catch(e => console.log("Force play A error:", e))
+            }
+            if (videoB) {
                 videoB.muted = newMuted
+                videoB.play().catch(e => console.log("Force play B error:", e))
             }
 
             setIsMuted(newMuted)
+            setIsPlaying(true)
             return !newMuted // Return true if audio is now ON
         },
         setMuted: (muted) => {
