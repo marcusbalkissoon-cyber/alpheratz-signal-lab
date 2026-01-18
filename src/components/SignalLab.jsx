@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { ArrowRight } from 'lucide-react'
 import MissionLog from './MissionLog'
 import ComparePlayer from './ComparePlayer'
@@ -13,7 +14,19 @@ import './SignalLab.css'
  * - LOG 03: SYNTHETIC - Sonic Architecture
  */
 const SignalLab = () => {
+    // Persistent UI click sound (won't be garbage collected)
+    const uiAudio = useRef(typeof Audio !== 'undefined' ? new Audio('/ui/ui_click.mp3') : null)
+
+    const playClickSound = () => {
+        if (uiAudio.current) {
+            uiAudio.current.currentTime = 0
+            uiAudio.current.volume = 0.3
+            uiAudio.current.play().catch(() => { })
+        }
+    }
+
     const handleIntakeClick = () => {
+        playClickSound()
         window.open('https://tally.so/r/J9lZad', '_blank', 'noopener,noreferrer')
     }
 

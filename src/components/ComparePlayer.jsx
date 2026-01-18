@@ -98,10 +98,15 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             const videoB = videoBRef.current
             const newMuted = !isMuted
 
-            // iOS requires explicit play() on user interaction
-            if (!newMuted && videoA && videoB) {
+            // iOS Kickstart: Explicit play() + muted = false on user interaction
+            if (videoA && videoB) {
+                // Always try to play first
                 videoA.play().catch(() => { })
                 videoB.play().catch(() => { })
+
+                // Then set muted state directly on elements
+                videoA.muted = newMuted
+                videoB.muted = newMuted
             }
 
             setIsMuted(newMuted)
@@ -235,7 +240,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
         >
-            {/* Bottom Video (A - Simulation) - Always visible */}
+            {/* Bottom Video (A - Simulation) - Always visible, starts muted */}
             <video
                 ref={videoARef}
                 className="compare-video compare-video-bottom"
@@ -243,11 +248,13 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
                 poster={posterA}
                 autoPlay
                 loop
-                muted={isMuted}
+                muted
                 playsInline
+                webkit-playsinline="true"
+                preload="auto"
             />
 
-            {/* Top Video (B - Reality) - Clipped based on slider */}
+            {/* Top Video (B - Reality) - Clipped based on slider, starts muted */}
             <video
                 ref={videoBRef}
                 className="compare-video compare-video-top"
@@ -256,8 +263,10 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
                 style={{ clipPath }}
                 autoPlay
                 loop
-                muted={isMuted}
+                muted
                 playsInline
+                webkit-playsinline="true"
+                preload="auto"
             />
 
             {/* Divider Line */}
