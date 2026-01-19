@@ -114,13 +114,14 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             const videoB = videoBRef.current
             const newMuted = !isMuted
 
-            // iOS Aggressive Kickstart: muted = false FIRST, then play()
+            // Simulation (A) always stays muted - it's silent
+            // Reality (B) is the audio source
             if (videoA) {
-                videoA.muted = newMuted
+                videoA.muted = true // Always muted
                 videoA.play().catch(() => { })
             }
             if (videoB) {
-                videoB.muted = newMuted
+                videoB.muted = newMuted // Toggle audio on Reality
                 videoB.play().catch(() => { })
             }
 
@@ -136,6 +137,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             const videoA = videoARef.current
             const videoB = videoBRef.current
             if (videoA && videoB) {
+                videoA.muted = true // Simulation always muted
                 videoA.play().catch(() => { })
                 videoB.play().catch(() => { })
                 setIsPlaying(true)
@@ -143,7 +145,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
         }
     }))
 
-    // Video Sync Lock: Keep videos in sync via timeupdate on master (A)
+    // Video Sync Lock: Reality (B) is master, Simulation (A) follows
     const handleTimeUpdate = useCallback(() => {
         const videoA = videoARef.current
         const videoB = videoBRef.current
@@ -152,7 +154,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             const drift = Math.abs(videoA.currentTime - videoB.currentTime)
             // Only sync if drift is noticeable (>0.3s) to avoid fighting during buffering
             if (drift > 0.3) {
-                videoB.currentTime = videoA.currentTime
+                videoA.currentTime = videoB.currentTime // A syncs to B (Reality is master)
             }
         }
     }, [])
@@ -234,7 +236,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
         >
-            {/* Bottom Video (A - Simulation) - Master for sync */}
+            {/* Bottom Video (A - Simulation) - Always muted, syncs to Reality */}
             <video
                 ref={videoARef}
                 className="compare-video compare-video-bottom"
@@ -246,10 +248,9 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
                 playsInline
                 webkit-playsinline="true"
                 preload="auto"
-                onTimeUpdate={handleTimeUpdate}
             />
 
-            {/* Top Video (B - Reality) - Synced to master */}
+            {/* Top Video (B - Reality) - Audio source, time master */}
             <video
                 ref={videoBRef}
                 className="compare-video compare-video-top"
@@ -262,6 +263,7 @@ const ComparePlayer = forwardRef(({ srcA, srcB, posterA = '/images/spec_organic.
                 playsInline
                 webkit-playsinline="true"
                 preload="auto"
+                onTimeUpdate={handleTimeUpdate}
             />
 
             {/* Divider Line */}
