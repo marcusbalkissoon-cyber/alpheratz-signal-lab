@@ -4,7 +4,9 @@
    ==================================== */
 
 /* CSS Reset & Base */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -20,18 +22,19 @@
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-hover: rgba(255, 255, 255, 0.08);
-  
-  /* Typography */
-  --font-header: 'Rajdhani', sans-serif;
-  --font-body: 'Manrope', sans-serif;
-  
+
+  /* Typography - Monospace Terminal Style */
+  --font-mono: 'Courier New', Courier, monospace;
+  --font-header: 'Courier New', Courier, monospace;
+  --font-body: 'Courier New', Courier, monospace;
+
   /* Spacing */
   --space-xs: 0.5rem;
   --space-sm: 1rem;
   --space-md: 1.5rem;
   --space-lg: 2rem;
   --space-xl: 3rem;
-  
+
   /* Border Radius */
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -58,7 +61,12 @@ body {
 }
 
 /* Typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-header);
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -175,14 +183,12 @@ h3 {
 /* Decorative Elements */
 .divider {
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--glass-border) 20%,
-    var(--accent-gold-dim) 50%,
-    var(--glass-border) 80%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--glass-border) 20%,
+      var(--accent-gold-dim) 50%,
+      var(--glass-border) 80%,
+      transparent 100%);
   margin: var(--space-lg) 0;
 }
 
@@ -192,13 +198,25 @@ h3 {
 
 /* Animations */
 @keyframes pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
 }
 
 .animate-pulse {
@@ -230,7 +248,7 @@ h3 {
     --space-lg: 1.5rem;
     --space-xl: 2rem;
   }
-  
+
   .container {
     padding: var(--space-sm);
   }

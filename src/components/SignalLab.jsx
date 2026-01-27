@@ -1,17 +1,16 @@
 import { useRef, useEffect } from 'react'
-import { ArrowRight } from 'lucide-react'
 import MissionLog from './MissionLog'
 import ComparePlayer from './ComparePlayer'
 import Starfield from './Starfield'
 import './SignalLab.css'
 
 /**
- * SignalLab - The Main Feed
+ * SignalLab - Commercial Landing Page
  * 
- * Renders 3 Mission Logs in a vertical stack:
- * - LOG 01: ORGANIC - Bio-Acoustic Preservation
- * - LOG 02: VISCERAL - Visual Grounding (ComparePlayer)
- * - LOG 03: SYNTHETIC - Sonic Architecture
+ * The Signal Lab: Audio Engineering & Sound Design
+ * - Hero: Resonance Weaver product showcase
+ * - Split-stream CTAs: Try Tool vs Hire Creator
+ * - Archive: Portfolio/Mission Logs proving competence
  */
 const SignalLab = () => {
     // Persistent UI click sound ref
@@ -22,7 +21,6 @@ const SignalLab = () => {
         clickSound.current = new Audio('/ui/ui_click.mp3')
         clickSound.current.preload = 'auto'
         clickSound.current.volume = 0.3
-        // Force load
         clickSound.current.load()
 
         return () => {
@@ -40,12 +38,17 @@ const SignalLab = () => {
         }
     }
 
-    const handleIntakeClick = () => {
+    const handleArtifactClick = () => {
         playClickSound()
-        window.open('https://tally.so/r/J9lZad', '_blank', 'noopener,noreferrer')
+        window.open('https://resonance-weaver-2.vercel.app/', '_blank', 'noopener,noreferrer')
     }
 
-    // Content data for logs
+    const handleCommissionClick = () => {
+        playClickSound()
+        window.open('https://www.markuscolemusic.com/contact', '_blank', 'noopener,noreferrer')
+    }
+
+    // Content data for archived logs
     const log01 = {
         architectLog: `The directive was Transparency. In a digital age, the luxury of Folk music is its "flaws"—the squeak of the fretboard, the breath of the room, the friction of skin on steel. We approached this not as cleaning the audio, but as Bio-Acoustic Preservation. We stripped away digital saturation to honor the physics of the instruments. We engineered the room tone to make the listener feel like they are sitting inside the circle.`
     }
@@ -63,30 +66,57 @@ const SignalLab = () => {
             {/* Cosmic Background */}
             <Starfield starCount={120} />
 
-            {/* Page Header */}
-            <header className="signal-lab-header">
-                <div className="header-emblem">
-                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                        <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="1" opacity="0.3" />
-                        <circle cx="24" cy="24" r="16" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-                        <circle cx="24" cy="24" r="10" stroke="currentColor" strokeWidth="1" opacity="0.7" />
-                        <circle cx="24" cy="24" r="4" fill="currentColor" />
-                    </svg>
-                </div>
-                <h1 className="header-title">
-                    <span className="title-prefix">The</span>
-                    <span className="title-main glow-text">Signal Lab</span>
-                </h1>
-                <p className="header-subtitle">Alpheratz Technologies • Signal Archive</p>
-                <div className="header-status">
-                    <span className="status-indicator" />
-                    <span className="status-text">TRANSMISSION ACTIVE</span>
-                </div>
-            </header>
+            {/* ====== HERO SECTION ====== */}
+            <section className="hero-section">
+                <div className="hero-container">
+                    {/* Emblem */}
+                    <div className="hero-emblem">
+                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                            <circle cx="32" cy="32" r="30" stroke="var(--accent-gold)" strokeWidth="1" opacity="0.3" />
+                            <circle cx="32" cy="32" r="22" stroke="var(--accent-gold)" strokeWidth="1" opacity="0.5" />
+                            <circle cx="32" cy="32" r="14" stroke="var(--accent-gold)" strokeWidth="1" opacity="0.7" />
+                            <circle cx="32" cy="32" r="6" fill="var(--accent-gold)" />
+                        </svg>
+                    </div>
 
-            <div className="divider" />
+                    {/* Headlines */}
+                    <h1 className="hero-headline">THE RESONANCE WEAVER</h1>
+                    <p className="hero-subtitle">VISUAL RESONANCE ENGINE // v1.0</p>
 
-            {/* Mission Logs Feed */}
+                    {/* Description */}
+                    <p className="hero-description">
+                        PASSIVE LISTENING IS DEAD. THIS ENGINE ALLOWS YOU TO PHYSICALLY
+                        MANIPULATE THE GEOMETRY OF THE AUDIO SIGNAL. TOUCH THE WAVEFORM.
+                        DISTORT THE FREQUENCY.
+                    </p>
+
+                    {/* Split-Stream Buttons */}
+                    <div className="hero-buttons">
+                        <button
+                            className="btn-artifact"
+                            onClick={handleArtifactClick}
+                            aria-label="Initialize Artifact - Try the tool"
+                        >
+                            [ INITIALIZE ARTIFACT ]
+                        </button>
+
+                        <button
+                            className="btn-commission"
+                            onClick={handleCommissionClick}
+                            aria-label="Initiate Commission - Hire the creator"
+                        >
+                            [ INITIATE COMMISSION ]
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* ====== ARCHIVE DIVIDER ====== */}
+            <div className="archive-divider">
+                <span className="archive-label">// ARCHIVED SIGNAL PROTOCOLS</span>
+            </div>
+
+            {/* ====== MISSION LOGS ARCHIVE ====== */}
             <main className="signal-lab-feed container">
 
                 {/* LOG 01: ORGANIC */}
@@ -139,50 +169,11 @@ const SignalLab = () => {
 
             </main>
 
-            {/* CTA Section */}
-            <section className="intake-section">
-                <div className="divider" />
-                <div className="intake-container container">
-                    <div className="intake-terminal">
-                        <div className="terminal-header">
-                            <span className="terminal-dot" />
-                            <span className="terminal-dot" />
-                            <span className="terminal-dot" />
-                            <span className="terminal-title">SIGNAL_LAB_TERMINAL</span>
-                        </div>
-                        <div className="terminal-body">
-                            <p className="terminal-prompt">
-                                <span className="prompt-symbol">&gt;</span>
-                                <span className="prompt-text">READY TO TRANSMIT YOUR SIGNAL?</span>
-                            </p>
-                            <button
-                                className="intake-button"
-                                onClick={handleIntakeClick}
-                                aria-label="Open intake form"
-                            >
-                                <span className="button-text">INITIATE PROJECT</span>
-                                <span className="button-separator">//</span>
-                                <span className="button-action">OPEN INTAKE FORM</span>
-                                <ArrowRight size={20} className="button-arrow" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Footer */}
+            {/* ====== FOOTER ====== */}
             <footer className="signal-lab-footer">
                 <div className="divider" />
                 <div className="footer-content container">
-                    <div className="footer-logo">
-                        <span className="logo-text">ALPHERATZ</span>
-                        <span className="logo-suffix">TECHNOLOGIES</span>
-                    </div>
-                    <div className="footer-meta">
-                        <span className="meta-text">SIGNAL LAB v1.0</span>
-                        <span className="meta-separator">•</span>
-                        <span className="meta-text">© 2026</span>
-                    </div>
+                    <span className="footer-text">ENGINEERED BY THE SIGNAL LAB © 2026</span>
                 </div>
             </footer>
         </div>
