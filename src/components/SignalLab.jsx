@@ -66,6 +66,15 @@ const SignalLab = () => {
             {/* Cosmic Background */}
             <Starfield starCount={120} />
 
+            {/* ====== GLOBAL BRAND HEADER ====== */}
+            <header className="brand-header">
+                <div className="brand-container">
+                    <h2 className="brand-title">THE SIGNAL LAB</h2>
+                    <p className="brand-subtitle">ALPHERATZ TECHNOLOGIES // EST. 2026</p>
+                </div>
+                <div className="brand-divider" />
+            </header>
+
             {/* ====== HERO SECTION ====== */}
             <section className="hero-section">
                 <div className="hero-container">
